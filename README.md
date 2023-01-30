@@ -57,7 +57,31 @@ import 'package:adjustable_positioned/adjustable_positioned.dart';
 ## Usage
 
 ```dart
-
+...
+var handleSize = 24.0;
+Stack(
+    children: [
+        Positioned(...),
+        AdjustablePositionedWidget<Object>(
+            startX: 48,
+            startY: 64,
+            startW: 128,
+            startH: 128,
+            minW: 64,
+            minH: 64,
+            activeAdjustmentCallback: (rect) { /** Do something */ },
+            finishedAdjustmentCallback: (rect) { /** Do something else */ },
+            handleWidgetBuilder: (context, handleId) => const Icon(Icons.circle),
+            handleSize: handleSize,
+            dragData: null,
+            child: Padding(
+                padding: EdgeInsets.all(handleSize),
+                child: Container(color: Colors.red,),
+            ),
+        ),
+    ....
+    ]);
+...
 ```
 
 ## Additional information
