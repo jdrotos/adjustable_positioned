@@ -21,6 +21,8 @@ Change the size of your widget.
 
 Customize drag handles.
 
+![Sample](readme_assets/example.gif)
+
 ## Getting started
 
 ### 1. Depend on it
