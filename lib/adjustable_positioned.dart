@@ -28,6 +28,9 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
 
   final bool dragEnabled, handlesEnabled;
 
+  // If this is set to true, we will update our state based on the widget args
+  final bool consumeArgumentUpdates;
+
   const AdjustablePositionedWidget({
     super.key,
     required this.startX,
@@ -44,6 +47,7 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
     required this.dragData,
     this.dragEnabled = true,
     this.handlesEnabled = true,
+    this.consumeArgumentUpdates = false,
   });
 
   @override
@@ -56,21 +60,28 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
 
   @override
   void initState() {
-    x = widget.startX;
-    y = widget.startY;
-    w = widget.startW;
-    h = widget.startH;
+    _consumeWidgetValues();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.consumeArgumentUpdates) {
+      _consumeWidgetValues();
+    }
     return Positioned(
         left: x,
         top: y,
         width: max(w, widget.minW),
         height: max(h, widget.minH),
         child: _wrapWithHandlesIfEnabled(_wrapWithDraggableIfEnabled(widget.child)));
+  }
+
+  void _consumeWidgetValues() {
+    x = widget.startX;
+    y = widget.startY;
+    w = widget.startW;
+    h = widget.startH;
   }
 
   Widget _wrapWithHandlesIfEnabled(Widget child) {
@@ -149,7 +160,10 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
           width: max(w, widget.minW),
           height: max(h, widget.minH),
           // NOTE: Need the Material widget to have proper theme data
-          child: Material(child: widget.child),
+          child: Material(
+            color: Colors.transparent,
+            child: widget.child,
+          ),
         ),
         childWhenDragging: Container(),
         child: child);
