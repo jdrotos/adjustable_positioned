@@ -19,6 +19,10 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
   final double minW;
   final double minH;
 
+  // In some situations (interactive viewer) your widget may be zoomed in a way where the size on screen is different than
+  // the size that is defined. This can result in a jump in size when dragging, which we don't want.
+  final double dragScale;
+
   final double startX;
   final double startY;
   final double startW;
@@ -48,6 +52,7 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
     this.dragEnabled = true,
     this.handlesEnabled = true,
     this.consumeArgumentUpdates = false,
+    this.dragScale = 1.0,
   });
 
   @override
@@ -136,8 +141,15 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
     if (!widget.dragEnabled) {
       return child;
     }
+
     return Draggable<T>(
         data: widget.dragData as T?,
+        dragAnchorStrategy: (draggable, context, position) {
+          var anchorStrategy = childDragAnchorStrategy(draggable, context, position);
+          // Because the anchorStrategy is effectively a touch offset, we need to scale that.
+          // Note: the feedback scale works in coordination with this (so continue using a topLeft alignment there)
+          return anchorStrategy * widget.dragScale;
+        },
         onDragStarted: () {
           setState(() {
             dragging = true;
@@ -151,18 +163,22 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
         },
         onDragUpdate: (details) {
           setState(() {
-            x += details.delta.dx;
-            y += details.delta.dy;
+            x += details.delta.dx / widget.dragScale;
+            y += details.delta.dy / widget.dragScale;
           });
           widget.activeAdjustmentCallback(Rect.fromLTWH(x, y, max(w, widget.minW), max(h, widget.minH)));
         },
-        feedback: SizedBox(
-          width: max(w, widget.minW),
-          height: max(h, widget.minH),
-          // NOTE: Need the Material widget to have proper theme data
-          child: Material(
-            color: Colors.transparent,
-            child: widget.child,
+        feedback: Transform.scale(
+          scale: widget.dragScale,
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: max(w, widget.minW),
+            height: max(h, widget.minH),
+            // NOTE: Need the Material widget to have proper theme data
+            child: Material(
+              color: Colors.transparent,
+              child: widget.child,
+            ),
           ),
         ),
         childWhenDragging: Container(),
