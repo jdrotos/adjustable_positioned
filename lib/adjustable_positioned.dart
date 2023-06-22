@@ -28,6 +28,8 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
   final double startW;
   final double startH;
 
+  final double? aspectRatio;
+
   final double handleSize;
 
   final bool dragEnabled, handlesEnabled;
@@ -53,6 +55,7 @@ class AdjustablePositionedWidget<T extends Object> extends StatefulWidget {
     this.handlesEnabled = true,
     this.consumeArgumentUpdates = false,
     this.dragScale = 1.0,
+    this.aspectRatio,
   });
 
   @override
@@ -120,6 +123,15 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
           }
           if (handleId == HandleId.S || handleId == HandleId.SW || handleId == HandleId.SE) {
             h += details.delta.dy;
+          }
+
+          final aspectRatio = widget.aspectRatio;
+          if(aspectRatio != null){
+            if(w > h) {
+              h = w * aspectRatio;
+            } else if(h > w) {
+              w = h / aspectRatio;
+            }
           }
 
           setState(() {
