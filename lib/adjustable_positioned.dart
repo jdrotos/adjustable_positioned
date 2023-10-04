@@ -86,6 +86,7 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
   }
 
   void _consumeWidgetValues() {
+    if(dragging) return;
     x = widget.startX;
     y = widget.startY;
     w = widget.startW;
@@ -168,10 +169,10 @@ class _AdjustablePositionedWidgetState<T extends Object> extends State<Adjustabl
           });
         },
         onDragEnd: (_) {
+          widget.finishedAdjustmentCallback(Rect.fromLTWH(x, y, max(w, widget.minW), max(h, widget.minH)));
           setState(() {
             dragging = false;
           });
-          widget.finishedAdjustmentCallback(Rect.fromLTWH(x, y, max(w, widget.minW), max(h, widget.minH)));
         },
         onDragUpdate: (details) {
           setState(() {
